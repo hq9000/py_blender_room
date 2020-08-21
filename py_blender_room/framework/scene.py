@@ -1,7 +1,7 @@
 import abc
 from typing import List
 
-from framework.object import Object
+from py_blender_room.framework.object import Object
 
 
 class Scene:

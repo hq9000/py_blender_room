@@ -1,7 +1,7 @@
 from typing import Optional
 
-from framework.material import Material
-from framework.object import Object
+from py_blender_room.framework.material import Material
+from py_blender_room.framework.object import Object
 
 
 class Entity(Object):

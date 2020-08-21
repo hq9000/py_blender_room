@@ -1,8 +1,8 @@
 import abc
 
-from framework.object import Object
-from framework.object_renderer import ObjectRenderer
-from projects.room1.room1_scene import Wall
+from py_blender_room.framework.object import Object
+from py_blender_room.framework.object_renderer import ObjectRenderer
+from py_blender_room.projects.room1.room1_scene import Wall
 
 import bpy
 

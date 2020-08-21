@@ -2,9 +2,8 @@ from dataclasses import dataclass
 from math import sqrt
 from typing import List
 
-from framework.entity import Entity
-from framework.point import Point
-from framework.scene import Scene
+from py_blender_room.framework.entity import Entity
+from py_blender_room.framework.scene import Scene
 
 
 @dataclass
