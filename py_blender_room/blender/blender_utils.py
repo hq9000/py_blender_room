@@ -1,12 +1,15 @@
-from typing import List
+from typing import List, Tuple
 
 import bpy
 
 
 def remove_default_objects():
     # noinspection PyTypeChecker
-    # bpy.data.objects.remove(bpy.data.objects['Cube'], do_unlink=True)
-    pass
+    bpy.data.objects.remove(bpy.data.objects['Cube'], do_unlink=True)
+    # noinspection PyTypeChecker
+    bpy.data.objects.remove(bpy.data.objects['Camera'], do_unlink=True)
+    # noinspection PyTypeChecker
+    bpy.data.objects.remove(bpy.data.objects['Light'], do_unlink=True)
 
 
 def add_object_to_default_collection(obj):
@@ -41,9 +44,9 @@ def rotate_object_over_z(obj, angle: float):
     bpy.ops.transform.rotate(value=angle, orient_axis='Z')
 
 
-def rotate_many_objects(objects: List, angle: float, axis: str):
+def rotate_many_objects(objects: List, angle: float, axis: str, center: Tuple[float, float, float]):
     select_many_objects(objects)
-    bpy.ops.transform.rotate(value=angle, orient_axis=axis)
+    bpy.ops.transform.rotate(value=angle, orient_axis=axis, orient_type='GLOBAL', center_override=list(center))
 
 
 def hide_object(obj):

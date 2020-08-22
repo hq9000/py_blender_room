@@ -7,3 +7,5 @@ class SceneRenderer:
     def render(self, scene: Scene, object_renderer: ObjectRenderer):
         for obj in scene.objects:
             object_renderer.render_object(obj)
+
+        object_renderer.remove_default_objects()

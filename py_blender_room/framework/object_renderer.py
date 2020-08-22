@@ -7,3 +7,7 @@ class ObjectRenderer:
     @abc.abstractmethod
     def render_object(self, obj: Object):
         pass
+
+    @abc.abstractmethod
+    def remove_default_objects(self):
+        pass

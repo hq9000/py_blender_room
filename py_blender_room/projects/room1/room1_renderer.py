@@ -7,7 +7,7 @@ from py_blender_room.blender import blender_utils
 from py_blender_room.framework.material import Material
 from py_blender_room.framework.object import Object
 from py_blender_room.framework.object_renderer import ObjectRenderer
-from py_blender_room.projects.room1.room1_scene import Wall, WALL_MATERIAL_NAME, Window, GLASS_MATERIAL_NAME
+from py_blender_room.projects.room1.room1_scene import Wall, WALL_MATERIAL_NAME, Window, GLASS_MATERIAL_NAME, Floor
 
 import bpy
 
@@ -75,6 +75,16 @@ class MaterialRenderingStrategy:
         return mat
 
 
+class FloorRenderingStrategy(ObjectRenderingStrategy):
+
+    def render(self, floor: Floor):
+        mesh = create_box_mesh(floor.size_x, floor.size_y, 0.02)
+        floor_object = bpy.data.objects.new(generate_new_id(), mesh)
+        blender_utils.add_object_to_default_collection(floor_object)
+        material = MaterialRenderingStrategy().render(floor.material)
+        floor_object.data.materials.append(material)
+
+
 class WallRenderingStrategy(ObjectRenderingStrategy):
 
     def render(self, wall: Wall):
@@ -96,10 +106,9 @@ class WallRenderingStrategy(ObjectRenderingStrategy):
         material = MaterialRenderingStrategy().render(wall.material)
         wall_object.data.materials.append(material)
 
-        blender_utils.move_many_objects(all_objects, wall.x0, wall.y0, 0)
         angle = -asin((wall.x1 - wall.x0) / wall.width)
-
-        blender_utils.rotate_many_objects(all_objects, angle, 'Z')
+        blender_utils.rotate_many_objects(all_objects, angle, 'Z', (0, 0, 0))
+        blender_utils.move_many_objects(all_objects, wall.x0, wall.y0, 0)
 
     def _cut_out_hole_for_window(self, wall: Wall, wall_object, window: Window):
         mesh = create_box_mesh(wall.thickness * 3, window.width, window.height)
@@ -133,6 +142,9 @@ class WallRenderingStrategy(ObjectRenderingStrategy):
 
 class Room1ObjectRenderer(ObjectRenderer):
 
+    def remove_default_objects(self):
+        blender_utils.remove_default_objects()
+
     def __init__(self):
         self._initialized: bool = False
 
@@ -143,7 +155,8 @@ class Room1ObjectRenderer(ObjectRenderer):
 
         if isinstance(obj, Wall):
             WallRenderingStrategy().render(obj)
+        if isinstance(obj, Floor):
+            FloorRenderingStrategy().render(obj)
 
     def _initialize(self):
-        blender_utils.remove_default_objects()
         pass
