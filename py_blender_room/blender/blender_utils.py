@@ -51,3 +51,7 @@ def rotate_many_objects(objects: List, angle: float, axis: str, center: Tuple[fl
 
 def hide_object(obj):
     obj.hide_set(True)
+
+
+def add_sun(source_point: Tuple[float, float, float], target_point: Tuple[float, float, float]):
+    bpy.ops.object.light_add(type="SUN", location=list(source_point))

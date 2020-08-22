@@ -7,7 +7,7 @@ from py_blender_room.blender import blender_utils
 from py_blender_room.framework.material import Material
 from py_blender_room.framework.object import Object
 from py_blender_room.framework.object_renderer import ObjectRenderer
-from py_blender_room.projects.room1.room1_scene import Wall, WALL_MATERIAL_NAME, Window, GLASS_MATERIAL_NAME, Floor
+from py_blender_room.projects.room1.room1_scene import Wall, WALL_MATERIAL_NAME, Window, GLASS_MATERIAL_NAME, Floor, Sun
 
 import bpy
 
@@ -85,6 +85,11 @@ class FloorRenderingStrategy(ObjectRenderingStrategy):
         floor_object.data.materials.append(material)
 
 
+class SunRenderingStrategy(ObjectRenderingStrategy):
+    def render(self, sun: Sun):
+        bpy.ops.object.light_add(type="SUN", location=list(sun.location), rotation=list(sun.rotation))
+
+
 class WallRenderingStrategy(ObjectRenderingStrategy):
 
     def render(self, wall: Wall):
@@ -157,6 +162,8 @@ class Room1ObjectRenderer(ObjectRenderer):
             WallRenderingStrategy().render(obj)
         if isinstance(obj, Floor):
             FloorRenderingStrategy().render(obj)
+        if isinstance(obj, Sun):
+            SunRenderingStrategy().render(obj)
 
     def _initialize(self):
         pass

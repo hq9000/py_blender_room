@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from math import sqrt
-from typing import List
+from typing import List, Tuple
 
 from py_blender_room.framework.entity import Entity
 from py_blender_room.framework.material import Material
+from py_blender_room.framework.object import Object
 from py_blender_room.framework.scene import Scene
 
 WALL_MATERIAL_NAME: str = 'wall'
@@ -54,6 +55,12 @@ class Wall(Entity):
         return sqrt(pow(delta_x, 2) + pow(delta_y, 2))
 
 
+@dataclass
+class Sun(Object):
+    location: Tuple[float, float, float]
+    rotation: Tuple[float, float, float]
+
+
 class Room1Scene(Scene):
 
     def __init__(self):
@@ -78,4 +85,4 @@ class Room1Scene(Scene):
 
         floor = Floor(size_x=self.size_x, size_y=self.size_y, material=floor_material)
 
-        self.objects = [wall_a, floor]
+        self.objects = [wall_a, floor, Sun(location=(0, 0, 5), rotation=(-1, 0, 0))]
