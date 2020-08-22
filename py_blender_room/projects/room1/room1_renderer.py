@@ -7,7 +7,7 @@ from py_blender_room.blender import blender_utils
 from py_blender_room.framework.material import Material
 from py_blender_room.framework.object import Object
 from py_blender_room.framework.object_renderer import ObjectRenderer
-from py_blender_room.projects.room1.room1_scene import Wall, WALL_MATERIAL_NAME
+from py_blender_room.projects.room1.room1_scene import Wall, WALL_MATERIAL_NAME, Window, GLASS_MATERIAL_NAME
 
 import bpy
 
@@ -70,7 +70,8 @@ class MaterialRenderingStrategy:
         mat.use_nodes = True
         if material.name == WALL_MATERIAL_NAME:
             mat.diffuse_color = (0.8, 0.00652415, 0, 1)
-
+        if material.name == GLASS_MATERIAL_NAME:
+            mat.diffuse_color = (0.0, 0.00652415, 0.8, 0.1)
         return mat
 
 
@@ -85,36 +86,49 @@ class WallRenderingStrategy(ObjectRenderingStrategy):
         blender_utils.add_object_to_default_collection(wall_object)
 
         # creating holes in the wall
+        window_objects = []
         for window in wall.windows:
-            window_mesh = create_box_mesh(wall.thickness * 3, window.width, window.height)
+            self._cut_out_hole_for_window(wall, wall_object, window)
+            window_objects.append(self._create_glass_for_window(wall, window))
 
-            window_object_id = "window_" + generate_new_id()
-
-            window_object = bpy.data.objects.new(window_object_id, window_mesh)
-            blender_utils.add_object_to_default_collection(window_object)
-
-            # blender_utils.select_one_object(wall_object)
-            modifier_name = "cut out window " + window_object_id
-            modifier = wall_object.modifiers.new(type="BOOLEAN", name=modifier_name)
-            modifier.object = window_object
-            modifier.operation = 'DIFFERENCE'
-
-            blender_utils.move_object(window_object, -wall.thickness, window.margin_left, window.margin_bottom)
-            #
-            bpy.context.view_layer.objects.active = bpy.data.objects[wall_object.name]
-            bpy.ops.object.modifier_apply(apply_as='DATA', modifier=modifier.name)
-            bpy.data.objects.remove(window_object, do_unlink=True)
-            #blender_utils.hide_object(window_object)
+        all_objects = [wall_object, *window_objects]
 
         material = MaterialRenderingStrategy().render(wall.material)
         wall_object.data.materials.append(material)
 
-        blender_utils.move_object(wall_object, wall.x0, wall.y0, 0)
+        blender_utils.move_many_objects(all_objects, wall.x0, wall.y0, 0)
         angle = -asin((wall.x1 - wall.x0) / wall.width)
 
-        print("rotating " + str(angle))
-        pprint(wall)
-        blender_utils.rotate_object_over_z(wall_object, angle)
+        blender_utils.rotate_many_objects(all_objects, angle, 'Z')
+
+    def _cut_out_hole_for_window(self, wall: Wall, wall_object, window: Window):
+        mesh = create_box_mesh(wall.thickness * 3, window.width, window.height)
+        window_object_id = "window_cutter_" + generate_new_id()
+        window_cutter_object = bpy.data.objects.new(window_object_id, mesh)
+        blender_utils.add_object_to_default_collection(window_cutter_object)
+        # blender_utils.select_one_object(wall_object)
+        modifier_name = "cut out window " + window_object_id
+        modifier = wall_object.modifiers.new(type="BOOLEAN", name=modifier_name)
+        modifier.object = window_cutter_object
+        modifier.operation = 'DIFFERENCE'
+        blender_utils.move_object(window_cutter_object, -wall.thickness, window.margin_left, window.margin_bottom)
+
+        bpy.context.view_layer.objects.active = bpy.data.objects[wall_object.name]
+        bpy.ops.object.modifier_apply(apply_as='DATA', modifier=modifier.name)
+        bpy.data.objects.remove(window_cutter_object, do_unlink=True)
+
+    def _create_glass_for_window(self, wall: Wall, window: Window):
+        mesh = create_box_mesh(window.thickness, window.width, window.height)
+        glass_object_id = "window_glass_" + generate_new_id()
+        glass_object = bpy.data.objects.new(glass_object_id, mesh)
+        blender_utils.add_object_to_default_collection(glass_object)
+
+        blender_utils.move_object(glass_object, 0, window.margin_left, window.margin_bottom)
+
+        material = MaterialRenderingStrategy().render(window.material)
+        glass_object.data.materials.append(material)
+
+        return glass_object
 
 
 class Room1ObjectRenderer(ObjectRenderer):

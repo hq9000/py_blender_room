@@ -1,3 +1,5 @@
+from typing import List
+
 import bpy
 
 
@@ -18,14 +20,30 @@ def select_one_object(obj):
     bpy.context.view_layer.objects.active = bpy.data.objects[obj.name]
 
 
+def select_many_objects(objects: List):
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj in objects:
+        obj.select_set(True)
+
+
 def move_object(obj, x: float, y: float, z: float):
     select_one_object(obj)
+    bpy.ops.transform.translate(value=[x, y, z])
+
+
+def move_many_objects(objects: List, x: float, y: float, z: float):
+    select_many_objects(objects)
     bpy.ops.transform.translate(value=[x, y, z])
 
 
 def rotate_object_over_z(obj, angle: float):
     select_one_object(obj)
     bpy.ops.transform.rotate(value=angle, orient_axis='Z')
+
+
+def rotate_many_objects(objects: List, angle: float, axis: str):
+    select_many_objects(objects)
+    bpy.ops.transform.rotate(value=angle, orient_axis=axis)
 
 
 def hide_object(obj):
