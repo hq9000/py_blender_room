@@ -1,7 +1,9 @@
 import abc
-from math import atan
+from math import atan, asin
+from pprint import pprint
 
-from py_blender_room.blender.utils import remove_default_objects
+import py_blender_room.blender.blender_utils
+from py_blender_room.blender import blender_utils
 from py_blender_room.framework.material import Material
 from py_blender_room.framework.object import Object
 from py_blender_room.framework.object_renderer import ObjectRenderer
@@ -75,19 +77,44 @@ class MaterialRenderingStrategy:
 class WallRenderingStrategy(ObjectRenderingStrategy):
 
     def render(self, wall: Wall):
-        mesh = create_box_mesh(wall.thickness, wall.width, wall.height)
-        obj = bpy.data.objects.new(generate_new_id(), mesh)
+        print('creating mesh for wall of width ' + str(wall.width))
 
-        col = bpy.data.collections.get("Collection")
-        col.objects.link(obj)
+        mesh = create_box_mesh(wall.thickness, wall.width, wall.height)
+        wall_object = bpy.data.objects.new(generate_new_id(), mesh)
+
+        blender_utils.add_object_to_default_collection(wall_object)
+
+        # creating holes in the wall
+        for window in wall.windows:
+            window_mesh = create_box_mesh(wall.thickness * 3, window.width, window.height)
+
+            window_object_id = "window_" + generate_new_id()
+
+            window_object = bpy.data.objects.new(window_object_id, window_mesh)
+            blender_utils.add_object_to_default_collection(window_object)
+
+            # blender_utils.select_one_object(wall_object)
+            modifier_name = "cut out window " + window_object_id
+            modifier = wall_object.modifiers.new(type="BOOLEAN", name=modifier_name)
+            modifier.object = window_object
+            modifier.operation = 'DIFFERENCE'
+
+            blender_utils.move_object(window_object, -wall.thickness, window.margin_left, window.margin_bottom)
+            #
+            bpy.context.view_layer.objects.active = bpy.data.objects[wall_object.name]
+            bpy.ops.object.modifier_apply(apply_as='DATA', modifier=modifier.name)
+            bpy.data.objects.remove(window_object, do_unlink=True)
+            #blender_utils.hide_object(window_object)
 
         material = MaterialRenderingStrategy().render(wall.material)
-        obj.data.materials.append(material)
-        bpy.ops.object.select_all(action='DESELECT')
-        obj.select_set(True)
-        bpy.ops.transform.translate(value=[wall.x0, wall.y0, 0])
-        angle = atan((wall.y1 - wall.y0) / (wall.x1 - wall.x0))
-        bpy.ops.transform.rotate(value=1.0 * angle, orient_axis='Z')
+        wall_object.data.materials.append(material)
+
+        blender_utils.move_object(wall_object, wall.x0, wall.y0, 0)
+        angle = -asin((wall.x1 - wall.x0) / wall.width)
+
+        print("rotating " + str(angle))
+        pprint(wall)
+        blender_utils.rotate_object_over_z(wall_object, angle)
 
 
 class Room1ObjectRenderer(ObjectRenderer):
@@ -104,5 +131,5 @@ class Room1ObjectRenderer(ObjectRenderer):
             WallRenderingStrategy().render(obj)
 
     def _initialize(self):
-        remove_default_objects()
+        blender_utils.remove_default_objects()
         pass
