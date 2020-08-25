@@ -1,6 +1,8 @@
+import os
 from typing import List, Tuple
 
 import bpy
+from py_blender_room.framework.material import Material
 
 
 def remove_default_objects():
@@ -34,6 +36,15 @@ def move_object(obj, x: float, y: float, z: float):
     bpy.ops.transform.translate(value=[x, y, z])
 
 
+def scale_object(obj, scale: Tuple[float, float, float]):
+    select_one_object(obj)
+    # bpy.ops.transform.resize(list(scale))
+
+
+def get_object_by_name(name: str):
+    return bpy.data.objects[name]
+
+
 def move_many_objects(objects: List, x: float, y: float, z: float):
     select_many_objects(objects)
     bpy.ops.transform.translate(value=[x, y, z])
@@ -55,3 +66,44 @@ def hide_object(obj):
 
 def add_sun(source_point: Tuple[float, float, float], target_point: Tuple[float, float, float]):
     bpy.ops.object.light_add(type="SUN", location=list(source_point))
+
+
+# noinspection PyTypeChecker
+def create_material(material: Material):
+    blender_material = bpy.data.materials.new(name=material.name)
+    blender_material.use_nodes = True
+
+    nodes = blender_material.node_tree.nodes
+    links = blender_material.node_tree.links
+
+    bsdf_node = nodes["Principled BSDF"]
+    texture_coordinate_node = nodes.new("ShaderNodeTexCoord")
+    texture_node = nodes.new(type="ShaderNodeTexImage")
+    mapping_node = nodes.new(type="ShaderNodeMapping")
+    material_output_node = nodes["Material Output"]
+
+    filename = os.path.basename(material.texture_file_path)
+
+    bpy.ops.image.open(filepath=material.texture_file_path,
+                       files=[
+                           {
+                               "name": filename
+                           }
+                       ],
+                       relative_path=True, show_multiview=False)
+
+    image = bpy.data.images[filename]
+    texture_node.image = image
+    links.new(texture_node.outputs['Color'], bsdf_node.inputs['Base Color'])
+    links.new(texture_node.outputs['Color'], material_output_node.inputs['Displacement'])
+    links.new(texture_coordinate_node.outputs['Generated'], mapping_node.inputs['Vector'])
+    links.new(mapping_node.outputs['Vector'], texture_node.inputs['Vector'])
+
+    bsdf_node.inputs['Metallic'].default_value = material.metallic
+    mapping_node.inputs['Scale'].default_value = list(material.scale)
+    mapping_node.inputs['Rotation'].default_value = list(material.rotation)
+
+    return blender_material
+
+    # bpy.context.space_data.context = 'MATERIAL'
+    # bpy.ops.node.add_node(type="ShaderNodeTexCoord", use_transform=True)

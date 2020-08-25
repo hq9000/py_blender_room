@@ -7,7 +7,8 @@ from py_blender_room.blender import blender_utils
 from py_blender_room.framework.material import Material
 from py_blender_room.framework.object import Object
 from py_blender_room.framework.object_renderer import ObjectRenderer
-from py_blender_room.projects.room1.room1_scene import Wall, WALL_MATERIAL_NAME, Window, GLASS_MATERIAL_NAME, Floor, Sun
+from py_blender_room.projects.room1.room1_scene import Wall, WALL_MATERIAL_NAME, Window, GLASS_MATERIAL_NAME, Floor, \
+    Sun, Camera
 
 import bpy
 
@@ -27,6 +28,11 @@ def generate_new_id() -> str:
     return str(_id)
 
 
+def create_box(size_x: float, size_y: float, size_z: float, name: str):
+    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=[0.5, 0.5, 0.5])
+    bpy.ops.transform.resize(value=list((size_x, size_y, size_z)), center_override=[0, 0, 0], orient_type='GLOBAL')
+    return bpy.context.selected_objects[0]
+
 def create_box_mesh(size_x: float, size_y: float, size_z: float):
     """
 
@@ -37,6 +43,7 @@ def create_box_mesh(size_x: float, size_y: float, size_z: float):
     :param size_z:
     :return:
     """
+
     points = [
         [0, 0, 0],  # 0
         [size_x, 0, 0],  # 1
@@ -66,28 +73,36 @@ def create_box_mesh(size_x: float, size_y: float, size_z: float):
 
 class MaterialRenderingStrategy:
     def render(self, material: Material):
-        mat = bpy.data.materials.new(name=generate_new_id())
-        mat.use_nodes = True
-        if material.name == WALL_MATERIAL_NAME:
-            mat.diffuse_color = (0.8, 0.00652415, 0, 1)
-        if material.name == GLASS_MATERIAL_NAME:
-            mat.diffuse_color = (0.0, 0.00652415, 0.8, 0.1)
+        mat = blender_utils.create_material(material)
+        # mat = bpy.data.materials.new(name=generate_new_id())
+        # mat.use_nodes = True
+        # if material.name == WALL_MATERIAL_NAME:
+        #     mat.diffuse_color = (0.8, 0.00652415, 0, 1)
+        # if material.name == GLASS_MATERIAL_NAME:
+        #     mat.diffuse_color = (0.0, 0.00652415, 0.8, 0.1)
         return mat
 
 
 class FloorRenderingStrategy(ObjectRenderingStrategy):
 
     def render(self, floor: Floor):
-        mesh = create_box_mesh(floor.size_x, floor.size_y, 0.02)
-        floor_object = bpy.data.objects.new(generate_new_id(), mesh)
-        blender_utils.add_object_to_default_collection(floor_object)
+        box = create_box(floor.size_x, floor.size_y, 0.02, 'testbox')
+
+        # mesh = create_box_mesh(floor.size_x, floor.size_y, 0.02)
+        # floor_object = bpy.data.objects.new(generate_new_id(), mesh)
+        # blender_utils.add_object_to_default_collection(floor_object)
         material = MaterialRenderingStrategy().render(floor.material)
-        floor_object.data.materials.append(material)
+        box.data.materials.append(material)
 
 
 class SunRenderingStrategy(ObjectRenderingStrategy):
     def render(self, sun: Sun):
-        bpy.ops.object.light_add(type="SUN", location=list(sun.location), rotation=list(sun.rotation))
+        sun_object = bpy.ops.object.light_add(type="SUN", location=list(sun.location), rotation=list(sun.rotation))
+
+
+class CameraRenderingStrategy(ObjectRenderingStrategy):
+    def render(self, camera: Camera):
+        bpy.ops.object.camera_add(location=list(camera.location), rotation=list(camera.rotation))
 
 
 class WallRenderingStrategy(ObjectRenderingStrategy):
@@ -164,6 +179,8 @@ class Room1ObjectRenderer(ObjectRenderer):
             FloorRenderingStrategy().render(obj)
         if isinstance(obj, Sun):
             SunRenderingStrategy().render(obj)
+        if isinstance(obj, Camera):
+            CameraRenderingStrategy().render(obj)
 
     def _initialize(self):
         pass

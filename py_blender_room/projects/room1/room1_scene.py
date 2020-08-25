@@ -9,7 +9,7 @@ from py_blender_room.framework.scene import Scene
 
 WALL_MATERIAL_NAME: str = 'wall'
 GLASS_MATERIAL_NAME: str = 'glass'
-FLOOR_MATERIAL_NAME: str = 'glass'
+FLOOR_MATERIAL_NAME: str = 'floor'
 CEILING_MATERIAL_NAME: str = 'ceiling'
 
 
@@ -61,7 +61,14 @@ class Sun(Object):
     rotation: Tuple[float, float, float]
 
 
+@dataclass
+class Camera(Object):
+    location: Tuple[float, float, float]
+    rotation: Tuple[float, float, float]
+
+
 class Room1Scene(Scene):
+    PI = 3.14
 
     def __init__(self):
         self.size_x: float = 13
@@ -71,9 +78,9 @@ class Room1Scene(Scene):
         super().__init__()
 
     def _build(self):
-        window_material = Material(name=GLASS_MATERIAL_NAME)
-        wall_material = Material(name=WALL_MATERIAL_NAME)
-        floor_material = Material(name=FLOOR_MATERIAL_NAME)
+        window_material = Material(name=GLASS_MATERIAL_NAME, texture_file_path='/home/sergey/Downloads/seamless-wood-floor-texture-free.jpg')
+        wall_material = Material(name=WALL_MATERIAL_NAME, texture_file_path='/home/sergey/Downloads/seamless-wood-floor-texture-free.jpg')
+        floor_material = Material(name=FLOOR_MATERIAL_NAME, texture_file_path='/home/sergey/Downloads/seamless-wood-floor-texture-free.jpg');
 
         window1 = Window(margin_bottom=1, height=2, width=1.5, margin_left=1.01, material=window_material)
         window2 = Window(margin_bottom=1, height=2, width=1.5, margin_left=3.01, material=window_material)
@@ -83,6 +90,16 @@ class Room1Scene(Scene):
                       x1=self.size_x, y1=self.size_y)
         wall_a.material = wall_material
 
+        wall_b = Wall(thickness=2, height=2, x0=0, y0=0, x1=2, y1=0, windows=[])
+        wall_b.material = wall_material
+
         floor = Floor(size_x=self.size_x, size_y=self.size_y, material=floor_material)
 
-        self.objects = [wall_a, floor, Sun(location=(0, 0, 5), rotation=(-1, 0, 0))]
+        self.objects = [
+            wall_a,
+            floor,
+            Sun(location=(0, 0, 5), rotation=(-1, 0, 0)),
+            Camera(location=(self.size_x * 1, self.size_y / 2, 1), rotation=(self.PI / 2, 0, self.PI / 2 - 0.3))
+        ]
+
+
