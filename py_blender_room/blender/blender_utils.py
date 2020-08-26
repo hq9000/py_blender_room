@@ -79,6 +79,8 @@ def create_material(material: Material):
     bsdf_node = nodes["Principled BSDF"]
     texture_coordinate_node = nodes.new("ShaderNodeTexCoord")
     texture_node = nodes.new(type="ShaderNodeTexImage")
+    texture_node.projection = 'BOX'
+
     mapping_node = nodes.new(type="ShaderNodeMapping")
     material_output_node = nodes["Material Output"]
 
@@ -95,11 +97,16 @@ def create_material(material: Material):
     image = bpy.data.images[filename]
     texture_node.image = image
     links.new(texture_node.outputs['Color'], bsdf_node.inputs['Base Color'])
-    links.new(texture_node.outputs['Color'], material_output_node.inputs['Displacement'])
+
+    if material.displacement is True:
+        links.new(texture_node.outputs['Color'], material_output_node.inputs['Displacement'])
+
     links.new(texture_coordinate_node.outputs['Generated'], mapping_node.inputs['Vector'])
     links.new(mapping_node.outputs['Vector'], texture_node.inputs['Vector'])
 
     bsdf_node.inputs['Metallic'].default_value = material.metallic
+    bsdf_node.inputs['Roughness'].default_value = material.roughness
+
     mapping_node.inputs['Scale'].default_value = list(material.scale)
     mapping_node.inputs['Rotation'].default_value = list(material.rotation)
 
