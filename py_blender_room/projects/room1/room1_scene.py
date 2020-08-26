@@ -71,6 +71,13 @@ class Room1Scene(Scene):
     PI = 3.14
 
     def __init__(self):
+        self.wall_thickness = 0.1
+        self.margin_left_of_first_window = 0.3
+        self.distance_between_windows = 0.1
+        self.window_width: float = 3
+        self.window_margin_top: float = 0.3
+        self.window_margin_bottom: float = 0.3
+        self.num_windows: int = 3
         self.size_x: float = 13
         self.size_y: float = 10
         self.height: float = 3
@@ -78,15 +85,35 @@ class Room1Scene(Scene):
         super().__init__()
 
     def _build(self):
-        window_material = Material(name=GLASS_MATERIAL_NAME, texture_file_path='/home/sergey/Downloads/seamless-wood-floor-texture-free.jpg')
-        wall_material = Material(name=WALL_MATERIAL_NAME, texture_file_path='/home/sergey/Downloads/seamless-wood-floor-texture-free.jpg')
-        floor_material = Material(name=FLOOR_MATERIAL_NAME, texture_file_path='/home/sergey/Downloads/seamless-wood-floor-texture-free.jpg');
+        window_material = Material(name=GLASS_MATERIAL_NAME,
+                                   texture_file_path='/home/sergey/Downloads/seamless-wood-floor-texture-free.jpg')
+        wall_material = Material(
+            name=WALL_MATERIAL_NAME,
+            texture_file_path='/home/sergey/Downloads/damask-seamless-pattern-background_1217-1269.jpg',
+            metallic=0.2,
+            scale=(7, 7, 3.5),
+            displacement=False
+        )
 
-        window1 = Window(margin_bottom=1, height=2, width=1.5, margin_left=1.01, material=window_material)
-        window2 = Window(margin_bottom=1, height=2, width=1.5, margin_left=3.01, material=window_material)
-        window3 = Window(margin_bottom=1, height=2, width=1.5, margin_left=5.01, material=window_material)
+        floor_material = Material(name=FLOOR_MATERIAL_NAME,
+                                  texture_file_path='/home/sergey/Downloads/seamless-wood-floor-texture-free.jpg',
+                                  scale=(4, 2, 2))
 
-        wall_a = Wall(thickness=0.9, height=4, windows=[window1, window2, window3], x0=0, y0=self.size_y,
+        ceiling_material = Material(name=CEILING_MATERIAL_NAME,
+                                    texture_file_path='/home/sergey/Downloads/seamless-wood-floor-texture-free.jpg',
+                                    scale=(4, 2, 2))
+
+        windows: List[Window] = []
+
+        for i in range(0, self.num_windows):
+            windows.append(Window(margin_bottom=self.window_margin_bottom, height=self.height - self.window_margin_top - self.window_margin_bottom,
+                                  width=self.window_width,
+                                  margin_left=self.margin_left_of_first_window + i * (
+                                          self.window_width + self.distance_between_windows),
+                                  material=window_material),
+                           )
+
+        wall_a = Wall(thickness=self.wall_thickness, height=self.height, windows=windows, x0=0, y0=self.size_y,
                       x1=self.size_x, y1=self.size_y)
         wall_a.material = wall_material
 
@@ -94,12 +121,12 @@ class Room1Scene(Scene):
         wall_b.material = wall_material
 
         floor = Floor(size_x=self.size_x, size_y=self.size_y, material=floor_material)
+        ceiling = Ceiling(size_x=self.size_x, size_y=self.size_y, height=self.height, material=ceiling_material)
 
         self.objects = [
             wall_a,
             floor,
+            ceiling,
             Sun(location=(0, 0, 5), rotation=(-1, 0, 0)),
             Camera(location=(self.size_x * 1, self.size_y / 2, 1), rotation=(self.PI / 2, 0, self.PI / 2 - 0.3))
         ]
-
-

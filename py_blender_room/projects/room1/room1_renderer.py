@@ -8,7 +8,7 @@ from py_blender_room.framework.material import Material
 from py_blender_room.framework.object import Object
 from py_blender_room.framework.object_renderer import ObjectRenderer
 from py_blender_room.projects.room1.room1_scene import Wall, WALL_MATERIAL_NAME, Window, GLASS_MATERIAL_NAME, Floor, \
-    Sun, Camera
+    Sun, Camera, Ceiling
 
 import bpy
 
@@ -97,14 +97,17 @@ class MaterialRenderingStrategy:
         return cls._instance
 
 
+class CeilingRenderingStrategy(ObjectRenderingStrategy):
+    def render(self, obj: Ceiling):
+        box = create_box(obj.size_x, obj.size_y, 0.02, 'ceiling_' + generate_new_id())
+        blender_utils.move_object(box, 0, 0, obj.height)
+        material = MaterialRenderingStrategy.get_instance().render(obj.material)
+        box.data.materials.append(material)
+
+
 class FloorRenderingStrategy(ObjectRenderingStrategy):
-
     def render(self, floor: Floor):
-        box = create_box(floor.size_x, floor.size_y, 0.02, 'testbox')
-
-        # mesh = create_box_mesh(floor.size_x, floor.size_y, 0.02)
-        # floor_object = bpy.data.objects.new(generate_new_id(), mesh)
-        # blender_utils.add_object_to_default_collection(floor_object)
+        box = create_box(floor.size_x, floor.size_y, 0.02, 'floor_' + generate_new_id())
         material = MaterialRenderingStrategy.get_instance().render(floor.material)
         box.data.materials.append(material)
 
@@ -191,6 +194,8 @@ class Room1ObjectRenderer(ObjectRenderer):
             WallRenderingStrategy().render(obj)
         if isinstance(obj, Floor):
             FloorRenderingStrategy().render(obj)
+        if isinstance(obj, Ceiling):
+            CeilingRenderingStrategy().render(obj)
         if isinstance(obj, Sun):
             SunRenderingStrategy().render(obj)
         if isinstance(obj, Camera):
