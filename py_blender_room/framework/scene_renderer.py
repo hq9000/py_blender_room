@@ -1,16 +1,26 @@
-from py_blender_room.blender import blender_utils
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+
+from py_blender_room.framework.modeler_interface import ModelerInterface
+from py_blender_room.modellers import blender
 from py_blender_room.framework.object_renderer import ObjectRenderer
 from py_blender_room.framework.scene import Scene
 
 
-class SceneRenderer:
+@dataclass
+class SceneRenderer(ABC):
+    modeler: ModelerInterface
 
-    def render(self, scene: Scene, object_renderer: ObjectRenderer):
+    @abstractmethod
+    def _render_object(self, obj):
+        pass
+
+    def render(self, scene: Scene):
 
         if scene.world_texture is not None:
-            blender_utils.set_world_texture(scene.world_texture)
+            self.modeler.set_world_texture(scene.world_texture)
 
         for obj in scene.objects:
-            object_renderer.render_object(obj)
+            self.render_object(obj)
 
-        object_renderer.remove_default_objects()
+        self.modeler.remove_default_objects()

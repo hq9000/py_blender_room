@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from math import sqrt
 from typing import List, Tuple, Optional
 
+from py_blender_room.framework.camera import Camera
 from py_blender_room.framework.entity import Entity
 from py_blender_room.framework.material import Material
 from py_blender_room.framework.object import Object
@@ -58,12 +59,6 @@ class Wall(Entity):
 
 @dataclass
 class Sun(Object):
-    location: Tuple[float, float, float]
-    rotation: Tuple[float, float, float]
-
-
-@dataclass
-class Camera(Object):
     location: Tuple[float, float, float]
     rotation: Tuple[float, float, float]
 
