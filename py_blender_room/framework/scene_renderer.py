@@ -18,6 +18,8 @@ class SceneRenderer(ABC):
 
     def render(self, scene: Scene):
 
+        self.modeler.initialize()
+
         if scene.world_texture is not None:
             self.modeler.set_world_texture(scene.world_texture)
 

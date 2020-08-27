@@ -11,6 +11,11 @@ from py_blender_room.framework.world_texture import WorldTexture
 # noinspection PyTypeChecker
 class Blender(ModelerInterface):
 
+    def initialize(self):
+        scene = bpy.data.scenes['Scene']
+        scene.render.engine = 'CYCLES'
+        scene.view_settings.look = 'High Contrast'
+
     def remove_default_objects(self):
         # noinspection PyTypeChecker
         bpy.data.objects.remove(bpy.data.objects['Cube'], do_unlink=True)
@@ -60,7 +65,7 @@ class Blender(ModelerInterface):
         obj.hide_set(True)
 
     def add_sun(self, source_point: Tuple[float, float, float], rotation: Tuple[float, float, float]):
-        bpy.ops.object.light_add(type="SUN", location=list(source_point))
+        bpy.ops.object.light_add(type="SUN", location=list(source_point), rotation=list(rotation))
 
     # noinspection PyTypeChecker
     def create_material(self, material: Material):
@@ -80,17 +85,7 @@ class Blender(ModelerInterface):
 
         if material.texture_file_path is not None:
 
-            filename = os.path.basename(material.texture_file_path)
-
-            bpy.ops.image.open(filepath=material.texture_file_path,
-                               files=[
-                                   {
-                                       "name": filename
-                                   }
-                               ],
-                               relative_path=True, show_multiview=False)
-
-            image = bpy.data.images[filename]
+            image = self._open_image(material.texture_file_path)
 
             texture_node.image = image
             links.new(texture_node.outputs['Color'], bsdf_node.inputs['Base Color'])
@@ -116,19 +111,34 @@ class Blender(ModelerInterface):
         node_tree = bpy.data.worlds['World'].node_tree
 
         nodes = node_tree.nodes
-        links = node_tree.links
-
         nodes.remove(nodes['Background'])  # removing the default node
+
+        links = node_tree.links
+        environment_texture_node = nodes.new(type="ShaderNodeTexEnvironment")
+        mapping_node = nodes.new(type="ShaderNodeMapping")
+
+        mapping_node.inputs['Rotation'].default_value = list(texture.rotation)
+        mapping_node.inputs['Scale'].default_value = list(texture.scale)
+        mapping_node.inputs['Location'].default_value = list(texture.location)
+
+        texture_coordinate_node = nodes.new("ShaderNodeTexCoord")
+
+        image = self._open_image(texture.path_to_hdr_file)
+        environment_texture_node.image = image
+
+        links.new(environment_texture_node.outputs['Color'], nodes['World Output'].inputs['Surface'])
+        links.new(texture_coordinate_node.outputs['Generated'], mapping_node.inputs['Vector'])
+        links.new(mapping_node.outputs['Vector'], environment_texture_node.inputs['Vector'])
 
     def add_camera(self, camera: Camera):
         bpy.ops.object.camera_add(location=list(camera.location), rotation=list(camera.rotation))
 
     def create_box(self, size_x: float, size_y: float, size_z: float, name: str):
+        self._log('creating box named ' + name)
         bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=[0.5, 0.5, 0.5])
         bpy.ops.transform.resize(value=list((size_x, size_y, size_z)), center_override=[0, 0, 0], orient_type='GLOBAL')
         obj = bpy.context.selected_objects[0]
         obj.name = name
-        self.add_object_to_default_collection(obj)
         return obj
 
     def cut_a_from_b(self, x, y):
@@ -143,3 +153,19 @@ class Blender(ModelerInterface):
 
     def assign_material_to_object(self, material, obj):
         obj.data.materials.append(material)
+
+    def _log(self, message: str):
+        print(message)
+
+    def _open_image(self, image_file_path) -> object:
+        filename = os.path.basename(image_file_path)
+
+        bpy.ops.image.open(filepath=image_file_path,
+                           files=[
+                               {
+                                   "name": filename
+                               }
+                           ],
+                           relative_path=True, show_multiview=False)
+
+        return bpy.data.images[filename]

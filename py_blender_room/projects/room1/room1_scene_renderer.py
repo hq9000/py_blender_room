@@ -43,12 +43,12 @@ class Room1SceneRenderer(SceneRenderer):
         glass_object = self.modeler.create_box(window.thickness, window.width, window.height,
                                                self._generate_new_id('window_glass'))
         self.modeler.move_object(glass_object, 0, window.margin_left, window.margin_bottom)
-        material = self.get_modeler_material(window.material)
-        glass_object.data.materials.append(material)
+        material = self._get_modeler_material(window.material)
+        self.modeler.assign_material_to_object(material, glass_object)
 
         return glass_object
 
-    def get_modeler_material(self, material: Material):
+    def _get_modeler_material(self, material: Material):
 
         if material not in self._material_registry:
             self._material_registry[material] = self.modeler.create_material(material)
@@ -60,7 +60,6 @@ class Room1SceneRenderer(SceneRenderer):
         self._log('creating mesh for wall of width ' + str(wall.width))
 
         wall_object = self.modeler.create_box(wall.thickness, wall.width, wall.height, self._generate_new_id('wall'))
-        self.modeler.add_object_to_default_collection(wall_object)
 
         # creating holes in the wall
         window_glass_objects = []
@@ -70,8 +69,8 @@ class Room1SceneRenderer(SceneRenderer):
 
         all_objects = [wall_object, *window_glass_objects]
 
-        material = self.get_modeler_material(wall.material)
-        wall_object.data.materials.append(material)
+        material = self._get_modeler_material(wall.material)
+        self.modeler.assign_material_to_object(material, wall_object)
 
         angle = -asin((wall.x1 - wall.x0) / wall.width)
         self.modeler.rotate_many_objects(all_objects, angle, 'Z', (0, 0, 0))
@@ -82,16 +81,14 @@ class Room1SceneRenderer(SceneRenderer):
 
     def _render_floor(self, floor: Floor):
         box = self.modeler.create_box(floor.size_x, floor.size_y, 0.02, self._generate_new_id('floor'))
-        material = self.get_modeler_material(floor.material)
+        material = self._get_modeler_material(floor.material)
         self.modeler.assign_material_to_object(material, box)
 
     def _render_ceiling(self, ceiling: Ceiling):
         box = self.modeler.create_box(ceiling.size_x, ceiling.size_y, 0.02, self._generate_new_id('ceiling'))
         self.modeler.move_object(box, 0, 0, ceiling.height)
-        material = self.get_modeler_material(ceiling.material)
+        material = self._get_modeler_material(ceiling.material)
         self.modeler.assign_material_to_object(material, box)
-        box.data.materials.append(material)
-        pass
 
     def _render_sun(self, obj: Sun):
         self.modeler.add_sun(obj.location, obj.rotation)

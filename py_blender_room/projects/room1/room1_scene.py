@@ -63,6 +63,10 @@ class Sun(Object):
     rotation: Tuple[float, float, float]
 
 
+def degrees_to_radians(degrees: float) -> float:
+    return degrees / 180 * 3.14
+
+
 class Room1Scene(Scene):
     PI = 3.14
 
@@ -75,12 +79,13 @@ class Room1Scene(Scene):
         self.window_width: float = 3
         self.window_margin_top: float = 0.3
         self.window_margin_bottom: float = 0.3
-        self.num_windows: int = 3
-        self.size_x: float = 13
+        self.num_windows: int = 13
+        self.size_x: float = 33
         self.size_y: float = 10
         self.height: float = 3
         self.world_texture: Optional[WorldTexture] = WorldTexture(
-            path_to_hdr_file="/home/sergey/Downloads/autumn_park_4k.hdr"
+            path_to_hdr_file="/home/sergey/Downloads/autumn_park_4k.hdr",
+            rotation=(degrees_to_radians(75), degrees_to_radians(29), degrees_to_radians(-40))
         )
 
     def build(self):
@@ -98,7 +103,7 @@ class Room1Scene(Scene):
         )
 
         floor_material = Material(name=FLOOR_MATERIAL_NAME,
-                                  texture_file_path='/home/sergey/Downloads/seamless-wood-floor-texture-free.jpg',
+                                  texture_file_path='/home/sergey/Downloads/laminate.jpeg',
                                   scale=(4, 2, 2))
 
         ceiling_material = Material(name=CEILING_MATERIAL_NAME,
@@ -126,13 +131,20 @@ class Room1Scene(Scene):
                           x1=0, y1=self.size_y)
         wall_front.material = wall_material
 
+        wall_left = Wall(thickness=self.wall_thickness, height=self.height, windows=[], x0=0, y0=0,
+                         x1=self.size_x, y1=0)
+        wall_left.material = wall_material
+
+        wall_back = Wall(thickness=self.wall_thickness, height=self.height, windows=[], x0=self.size_x, y0=0,
+                         x1=self.size_x, y1=self.size_y)
+        wall_back.material = wall_material
+
         floor = Floor(size_x=self.size_x, size_y=self.size_y, material=floor_material)
         ceiling = Ceiling(size_x=self.size_x, size_y=self.size_y, height=self.height, material=ceiling_material)
 
         self.objects = [
-            wall_right, wall_front,
+            wall_right, wall_front, wall_left, wall_back,
             floor,
             ceiling,
-            Sun(location=(0, 0, 5), rotation=(-1, 1, 0)),
-            Camera(location=(self.size_x * 1, self.size_y / 2, 1), rotation=(self.PI / 2, 0, self.PI / 2 - 0.3))
+            Camera(location=(self.size_x * 1, self.size_y / 2, 1), rotation=(self.PI / 2, 0, self.PI / 2))
         ]

@@ -80,3 +80,7 @@ class ModelerInterface(ABC):
     @abstractmethod
     def assign_material_to_object(self, material, obj):
         pass
+
+    @abstractmethod
+    def initialize(self):
+        pass
