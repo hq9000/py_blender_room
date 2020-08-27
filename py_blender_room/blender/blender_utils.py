@@ -3,6 +3,7 @@ from typing import List, Tuple
 
 import bpy
 from py_blender_room.framework.material import Material
+from py_blender_room.framework.world_texture import WorldTexture
 
 
 def remove_default_objects():
@@ -84,33 +85,45 @@ def create_material(material: Material):
     mapping_node = nodes.new(type="ShaderNodeMapping")
     material_output_node = nodes["Material Output"]
 
-    filename = os.path.basename(material.texture_file_path)
+    if material.texture_file_path is not None:
 
-    bpy.ops.image.open(filepath=material.texture_file_path,
-                       files=[
-                           {
-                               "name": filename
-                           }
-                       ],
-                       relative_path=True, show_multiview=False)
+        filename = os.path.basename(material.texture_file_path)
 
-    image = bpy.data.images[filename]
-    texture_node.image = image
-    links.new(texture_node.outputs['Color'], bsdf_node.inputs['Base Color'])
+        bpy.ops.image.open(filepath=material.texture_file_path,
+                           files=[
+                               {
+                                   "name": filename
+                               }
+                           ],
+                           relative_path=True, show_multiview=False)
 
-    if material.displacement is True:
-        links.new(texture_node.outputs['Color'], material_output_node.inputs['Displacement'])
+        image = bpy.data.images[filename]
 
-    links.new(texture_coordinate_node.outputs['Generated'], mapping_node.inputs['Vector'])
-    links.new(mapping_node.outputs['Vector'], texture_node.inputs['Vector'])
+        texture_node.image = image
+        links.new(texture_node.outputs['Color'], bsdf_node.inputs['Base Color'])
+
+        if material.use_texture_for_displacement is True:
+            links.new(texture_node.outputs['Color'], material_output_node.inputs['Displacement'])
+
+        links.new(texture_coordinate_node.outputs['Generated'], mapping_node.inputs['Vector'])
+        links.new(mapping_node.outputs['Vector'], texture_node.inputs['Vector'])
+
+        mapping_node.inputs['Scale'].default_value = list(material.scale)
+        mapping_node.inputs['Rotation'].default_value = list(material.rotation)
 
     bsdf_node.inputs['Metallic'].default_value = material.metallic
     bsdf_node.inputs['Roughness'].default_value = material.roughness
-
-    mapping_node.inputs['Scale'].default_value = list(material.scale)
-    mapping_node.inputs['Rotation'].default_value = list(material.rotation)
-
+    bsdf_node.inputs['Alpha'].default_value = material.alpha
     return blender_material
 
     # bpy.context.space_data.context = 'MATERIAL'
     # bpy.ops.node.add_node(type="ShaderNodeTexCoord", use_transform=True)
+
+
+def set_world_texture(self, texture: WorldTexture):
+    node_tree = bpy.data.worlds['World'].node_tree
+
+    nodes = node_tree.nodes
+    links = node_tree.links
+
+    nodes.remove(nodes['Background'])  # removing the default node
