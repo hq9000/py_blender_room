@@ -83,7 +83,7 @@ class Room1Scene(Scene):
             path_to_hdr_file="/home/sergey/Downloads/autumn_park_4k.hdr"
         )
 
-    def _build(self):
+    def build(self):
         window_material = Material(name=GLASS_MATERIAL_NAME,
                                    metallic=1.0,
                                    alpha=0.1,

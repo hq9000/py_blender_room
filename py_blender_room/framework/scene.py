@@ -10,8 +10,7 @@ class Scene:
     def __init__(self):
         self.objects: List[Object] = []
         self.world_texture: Optional[WorldTexture] = None
-        self._build()
 
     @abc.abstractmethod
-    def _build(self):
+    def build(self):
         pass

@@ -14,6 +14,7 @@ from py_blender_room.projects.room1.room1_scene import Room1Scene
 
 def run():
     scene = Room1Scene()
+    scene.build()
     modeler = FakeModeler()
     scene_renderer = Room1SceneRenderer()
     scene_renderer.modeler = modeler
