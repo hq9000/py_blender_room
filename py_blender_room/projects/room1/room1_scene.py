@@ -12,6 +12,7 @@ from py_blender_room.framework.world_texture import WorldTexture
 WALL_MATERIAL_NAME: str = 'wall'
 GLASS_MATERIAL_NAME: str = 'glass'
 FLOOR_MATERIAL_NAME: str = 'floor'
+TABLE_MATERIAL_NAME: str = 'table'
 CEILING_MATERIAL_NAME: str = 'ceiling'
 
 
@@ -55,6 +56,16 @@ class Wall(Entity):
         delta_x = self.x1 - self.x0
         delta_y = self.y1 - self.y0
         return sqrt(pow(delta_x, 2) + pow(delta_y, 2))
+
+
+@dataclass
+class Table(Entity):
+    location: Tuple[float, float, float] = (0, 0, 0)
+    rotation: Tuple[float, float, float] = (0, 0, 0)
+    thickness: float = 0.1
+    width: float = 1
+    height: float = 0.5
+    depth: float = 0.3
 
 
 @dataclass
@@ -102,9 +113,22 @@ class Room1Scene(Scene):
             use_texture_for_displacement=False
         )
 
+        table_material = Material(
+            name=TABLE_MATERIAL_NAME,
+            texture_file_path='/home/sergey/Downloads/wood_furniture.jpg',
+            metallic=0.2,
+            scale=(7, 7, 3.5),
+            use_texture_for_displacement=False
+        )
+
+        table_width = 2.1
+        table = Table(thickness=0.03, width=2.1, height=1, depth=1.2,
+                      location=(1, self.size_y / 2 - table_width / 2, 0))
+        table.material = table_material
+
         floor_material = Material(name=FLOOR_MATERIAL_NAME,
-                                  texture_file_path='/home/sergey/Downloads/laminate.jpeg',
-                                  scale=(4, 2, 2))
+                                  texture_file_path='/home/sergey/Downloads/parquet.jpg',
+                                  scale=(25, 8, 1))
 
         ceiling_material = Material(name=CEILING_MATERIAL_NAME,
                                     texture_file_path='/home/sergey/Downloads/ceiling_texture.jpg',
@@ -145,6 +169,7 @@ class Room1Scene(Scene):
         self.objects = [
             wall_right, wall_front, wall_left, wall_back,
             floor,
+            # table,
             ceiling,
             Camera(location=(self.size_x * 1, self.size_y / 2, 1), rotation=(self.PI / 2, 0, self.PI / 2))
         ]

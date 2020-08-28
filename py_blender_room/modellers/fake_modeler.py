@@ -7,6 +7,9 @@ from py_blender_room.framework.world_texture import WorldTexture
 
 
 class FakeModeler(ModelerInterface):
+    def initialize(self):
+        pass
+
     def remove_default_objects(self):
         pass
 
