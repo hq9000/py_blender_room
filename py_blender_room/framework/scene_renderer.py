@@ -2,9 +2,6 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 from py_blender_room.framework.modeler_interface import ModelerInterface
-from py_blender_room.framework.sceneobject import SceneObject
-from py_blender_room.modellers import blender
-from py_blender_room.framework.object_renderer import ObjectRenderer
 from py_blender_room.framework.scene import Scene
 
 
@@ -27,4 +24,3 @@ class SceneRenderer(ABC):
             self._render_object(obj)
 
         self.modeler.remove_default_objects()
-

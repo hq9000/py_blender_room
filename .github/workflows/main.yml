@@ -1,21 +1,19 @@
-# This is a basic workflow to help you get started with Actions
-
 name: blender room CI
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
 on:
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
+      - name: run unittests
+        run: python -m unittest discover py_blender_room/test
 
       - name: build the "Room1" scene in dockerized blender
         run:  docker run --rm -v `pwd`:/root/py_blender_room hq9000/blender:latest /root/blender-2.83.5-linux64/blender --python /root/py_blender_room/py_blender_room/projects/room1/build.py -b | grep "build succeeded"
