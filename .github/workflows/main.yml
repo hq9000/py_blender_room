@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: run unittests
-        run: python -m unittest discover py_blender_room/test
+        run: python3 -m unittest discover py_blender_room/test
 
       - name: build the "Room1" scene in dockerized blender
         run:  docker run --rm -v `pwd`:/root/py_blender_room hq9000/blender:latest /root/blender-2.83.5-linux64/blender --python /root/py_blender_room/py_blender_room/projects/room1/build.py -b | grep "build succeeded"
