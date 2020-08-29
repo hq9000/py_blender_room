@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 from math import sqrt
 from typing import List, Tuple, Optional
@@ -5,7 +6,7 @@ from typing import List, Tuple, Optional
 from py_blender_room.framework.camera import Camera
 from py_blender_room.framework.entity import Entity
 from py_blender_room.framework.material import Material
-from py_blender_room.framework.object import Object
+from py_blender_room.framework.sceneobject import SceneObject
 from py_blender_room.framework.scene import Scene
 from py_blender_room.framework.world_texture import WorldTexture
 
@@ -69,9 +70,9 @@ class Table(Entity):
 
 
 @dataclass
-class Sun(Object):
-    location: Tuple[float, float, float]
-    rotation: Tuple[float, float, float]
+class Sun(SceneObject):
+    location: Tuple[float, float, float] = (0, 0, 0)
+    rotation: Tuple[float, float, float] = (0, 0, 0)
 
 
 def degrees_to_radians(degrees: float) -> float:
@@ -84,6 +85,8 @@ class Room1Scene(Scene):
     def __init__(self):
         super().__init__()
 
+        resources_dir: str = os.path.dirname(os.path.realpath(__file__)) + '/resources'
+
         self.wall_thickness = 0.1
         self.margin_left_of_first_window = 0.3
         self.distance_between_windows = 0.3
@@ -94,12 +97,19 @@ class Room1Scene(Scene):
         self.size_x: float = 33
         self.size_y: float = 10
         self.height: float = 3
+        self.needs_sun: bool = True
+
+        self.path_to_floor_texture = resources_dir + '/parquet_texture.jpg'
+        self.path_to_sky_texture = resources_dir + '/sky_texture.jpg'
+        self.path_to_ceiling_texture = resources_dir + '/ceiling_texture.jpg'
+        self.path_to_wall_texture = resources_dir + '/wallpaper_texture.jpg'
+
+    def build(self):
         self.world_texture: Optional[WorldTexture] = WorldTexture(
-            path_to_hdr_file="/home/sergey/Downloads/autumn_park_4k.hdr",
+            path_to_texture_file=self.path_to_sky_texture,
             rotation=(degrees_to_radians(75), degrees_to_radians(29), degrees_to_radians(-40))
         )
 
-    def build(self):
         window_material = Material(name=GLASS_MATERIAL_NAME,
                                    metallic=1.0,
                                    alpha=0.1,
@@ -107,7 +117,7 @@ class Room1Scene(Scene):
                                    texture_file_path=None)
         wall_material = Material(
             name=WALL_MATERIAL_NAME,
-            texture_file_path='/home/sergey/Downloads/damask-seamless-pattern-background_1217-1269.jpg',
+            texture_file_path=self.path_to_wall_texture,
             metallic=0.2,
             scale=(7, 7, 3.5),
             use_texture_for_displacement=False
@@ -115,7 +125,7 @@ class Room1Scene(Scene):
 
         table_material = Material(
             name=TABLE_MATERIAL_NAME,
-            texture_file_path='/home/sergey/Downloads/wood_furniture.jpg',
+            texture_file_path=self.path_to_wall_texture,
             metallic=0.2,
             scale=(7, 7, 3.5),
             use_texture_for_displacement=False
@@ -127,11 +137,11 @@ class Room1Scene(Scene):
         table.material = table_material
 
         floor_material = Material(name=FLOOR_MATERIAL_NAME,
-                                  texture_file_path='/home/sergey/Downloads/parquet.jpg',
+                                  texture_file_path=self.path_to_floor_texture,
                                   scale=(25, 8, 1))
 
         ceiling_material = Material(name=CEILING_MATERIAL_NAME,
-                                    texture_file_path='/home/sergey/Downloads/ceiling_texture.jpg',
+                                    texture_file_path=self.path_to_ceiling_texture,
                                     metallic=0,
                                     use_texture_for_displacement=True,
                                     scale=(12, 8, 8))
@@ -166,10 +176,14 @@ class Room1Scene(Scene):
         floor = Floor(size_x=self.size_x, size_y=self.size_y, material=floor_material)
         ceiling = Ceiling(size_x=self.size_x, size_y=self.size_y, height=self.height, material=ceiling_material)
 
-        self.objects = [
+        objects: List[SceneObject] = [
             wall_right, wall_front, wall_left, wall_back,
             floor,
-            # table,
             ceiling,
-            Camera(location=(self.size_x * 1, self.size_y / 2, 1), rotation=(self.PI / 2, 0, self.PI / 2))
+            Camera(location=(self.size_x * 0.8, self.size_y / 2, 1), rotation=(self.PI / 2, 0, self.PI / 2))
         ]
+
+        if self.needs_sun:
+            objects.append(Sun(rotation=(degrees_to_radians(-45), degrees_to_radians(45), 0)))
+
+        self.objects = objects

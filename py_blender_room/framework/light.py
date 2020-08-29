@@ -1,5 +1,5 @@
-from py_blender_room.framework.object import Object
+from py_blender_room.framework.sceneobject import SceneObject
 
 
-class Light(Object):
+class Light(SceneObject):
     pass

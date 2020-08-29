@@ -13,13 +13,18 @@ from py_blender_room.projects.room1.room1_scene import Room1Scene
 
 def run():
     scene = Room1Scene()
+
+    scene.path_to_sky_texture = '/home/sergey/Downloads/autumn_park_4k.hdr'
+    scene.path_to_floor_texture = '/home/sergey/Downloads/parquet.jpg'
+    scene.path_to_wall_texture = '/home/sergey/Downloads/damask-seamless-pattern-background_1217-1269.jpg'
+    scene.path_to_ceiling_texture = '/home/sergey/Downloads/ceiling_texture.jpg'
+    scene.needs_sun = False
+
     scene.build()
     modeler = Blender()
     scene_renderer = Room1SceneRenderer()
     scene_renderer.modeler = modeler
     scene_renderer.render(scene)
-
-    print('build succeeded')
 
 
 # this script is supposed to be run with modellers, e.g.:

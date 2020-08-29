@@ -3,7 +3,7 @@ from typing import Dict
 
 from py_blender_room.framework.scene_renderer import SceneRenderer
 from py_blender_room.framework.material import Material
-from py_blender_room.framework.object import Object
+from py_blender_room.framework.sceneobject import SceneObject
 from py_blender_room.projects.room1.room1_scene import Wall, Window, Floor, \
     Sun, Camera, Ceiling, Table
 
@@ -11,7 +11,7 @@ from py_blender_room.projects.room1.room1_scene import Wall, Window, Floor, \
 class Room1SceneRenderer(SceneRenderer):
     _id_cursor: int = 0
 
-    def _render_object(self, obj: Object):
+    def _render_object(self, obj: SceneObject):
         if isinstance(obj, Wall):
             self._render_wall(obj)
         elif isinstance(obj, Floor):

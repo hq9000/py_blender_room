@@ -1,0 +1,2 @@
+class SceneObject:
+    pass

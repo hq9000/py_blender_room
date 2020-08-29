@@ -123,7 +123,7 @@ class Blender(ModelerInterface):
 
         texture_coordinate_node = nodes.new("ShaderNodeTexCoord")
 
-        image = self._open_image(texture.path_to_hdr_file)
+        image = self._open_image(texture.path_to_texture_file)
         environment_texture_node.image = image
 
         links.new(environment_texture_node.outputs['Color'], nodes['World Output'].inputs['Surface'])
