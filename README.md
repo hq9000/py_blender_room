@@ -6,13 +6,13 @@ A python framework for building 3D environments using Blender.
 ## Motivation
 I once had a need to create a 3D model of an empty room. The model would consist of some walls with windows, a floor and a ceiling.
 It was chosen to build it using Blender (https://www.blender.org/) a beautiful cross-platform and free 3D software.
-Moreover, I chose not to create a model "with a mouse", but to program it with Blender's python API.
+Moreover, I chose not to create a model "with a mouse", but to program it with the Blender's python API.
 
-As a result, py-blender-room was born, hence the "room" in the name.
+As a result, py-blender-room was born, hence the "room" in its name.
 
 ## How To
 
-py-blender-room offers a workflow to create models and open them in blender.
+py-blender-room offers a workflow to create models and open them in Blender.
 Individual models, called `projects`, reside in `projects` package. 
 
 The initial project, named `room1`, can be found there. The more models I (or anyone else) need to create, the more sub-packages will appear there.
@@ -35,7 +35,7 @@ as a result, blender will open with the model as shown in the video below:
 
 - `Scene` holds some objects
 - `SceneRenderer` knows how to get those objects and make `Modeler` "materialize" them
-- `Modeler` is something that implements `ModelerInterface`. An  example of a `Modeler` is `Blender`. Another example is `FakeModeler` which is used in unit test.
+- `Modeler` is something that implements `ModelerInterface`. An  example of a `Modeler` is `Blender`. Another example is `FakeModeler` which is used in unit tests.
 
 ### What a project is?
 
@@ -93,3 +93,11 @@ The build script:
 - instantiates a scene renderer
 - connects a scene renderer with a modeler
 - renders the scene
+
+## Testing
+
+There is a workflow set up to smoke-test the code in two ways:
+- by unit-testing with FakeModeler
+- by building "Room1" model using dockerized blender (https://hub.docker.com/repository/docker/hq9000/blender)
+
+currently, Blender 2.83 is supported and tested.
