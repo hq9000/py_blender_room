@@ -5,7 +5,7 @@ A python framework for building 3D environments using Blender.
 
 ## Motivation
 I once had a need to create a 3D model of an empty room. The model would consist of some walls with windows, a floor and a ceiling.
-It was chosen to build it using Blender (https://www.blender.org/) a beautiful cross-platform and free 3D software.
+It was chosen to build it using Blender (https://www.blender.org/) a beautiful cross-platform and free 3D modelling software.
 Moreover, I chose not to create a model "with a mouse", but to program it with the Blender's python API.
 
 As a result, py-blender-room was born, hence the "room" in its name.
