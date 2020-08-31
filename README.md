@@ -33,9 +33,9 @@ as a result, blender will open with the model as shown in the video below:
 
 ![image](https://user-images.githubusercontent.com/21345604/91696816-d461bf00-eb78-11ea-97cf-ea7e76d24990.png)
 
-- `Scene` holds some objets
+- `Scene` holds some objects
 - `SceneRenderer` knows how to get those objects and make `Modeler` "materialize" them
-- `Modeler` is something that implements `ModelerInterface`. An  example of a `Modeler` is `Blender`
+- `Modeler` is something that implements `ModelerInterface`. An  example of a `Modeler` is `Blender`. Another example is `FakeModeler` which is used in unit test.
 
 ### What a project is?
 
