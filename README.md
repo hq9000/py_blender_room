@@ -57,10 +57,9 @@ In a sense, these classes define the domain-specific language you need for your 
 
 The `Scene`, in its turn, maintains the list of objects, i.e. those "Walls", "Trees" and "Roads"
 
-The only requirement is that your scene renderer (described in the following section), knows how to translate the objects 
- the scene consists of, into the underlying `modeler` instruction. 
+The only requirement is that your scene renderer knows how to translate them into the sequence of `modeler` instructions. 
 For example, in case of walls, Room1SceneRenderer knows how to make modeler create Box meshes,
-cut out windows, insert "glasses" ang put the whole ensemble into appropriate position.
+cut out windows, insert "glasses" ang put the whole ensemble into an appropriate position.
 
 ### A Scene Renderer Class
 
